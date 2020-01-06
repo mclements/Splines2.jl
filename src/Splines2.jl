@@ -433,6 +433,4 @@ function ms(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
     ms_(x; kwargs...)(x, ders=ders)
 end
 
-end
-
 end # module
