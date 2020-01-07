@@ -7,7 +7,7 @@ A [Julia](https://julialang.org/) package for regression splines. The package cu
 The package is not currently registered. Installation from GitHub:
 
 ``` julia
-	using Pkg; Pkg.add(PackageSpec(url = "https://github.com/mclements/Splines2.jl"))
+using Pkg; Pkg.add(PackageSpec(url = "https://github.com/mclements/Splines2.jl"))
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ Exported functions include `Splines2.bs`, `Splines2.ns`, `Splines2.ms` and `Spli
 ### Documentation for `Splines2.bs`
 
 ``` julia
-	bs(x :: Array{T,1}; <keyword arguments>) where T<:Real
+bs(x :: Array{T,1}; <keyword arguments>) where T<:Real
 ```
 
 Calculate a basis for B-splines. 
@@ -42,7 +42,7 @@ The keyword arguments include one of:
 ### Documentation for `Splines2.bs_`
 
 ``` julia
-    bs_(x :: Array{T,1}; <keyword arguments>) where T<:Real
+bs_(x :: Array{T,1}; <keyword arguments>) where T<:Real
 ```
 
 Calculate a basis for B-splines and return a function with signature
