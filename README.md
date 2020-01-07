@@ -12,7 +12,7 @@ using Pkg; Pkg.add(PackageSpec(url = "https://github.com/mclements/Splines2.jl")
 
 ## Usage
 
-Exported functions include `Splines2.bs`, `Splines2.ns`, `Splines2.ms` and `Splines2.is`, which spport for spline basis evaluation for B-splines, natural B-splines, M-splinse and I-splines, respectively. These functions take an `::Array{<:Real,1}` argument and some design information and return the given spline basis. 
+Exported functions include `Splines2.bs`, `Splines2.ns`, `Splines2.ms` and `Splines2.is`, which provide evaluating spline bases for B-splines, natural B-splines, M-splines and I-splines, respectively. These functions take an `::Array{<:Real,1}` argument and some design information and return the given spline basis. 
 
 ### Documentation for `Splines2.bs`
 
