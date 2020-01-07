@@ -181,28 +181,28 @@ using StatsModels
 ns(x,df) = Splines2.ns(x,df=df,intercept=true) # assumes intercept
 const NSPLINE_CONTEXT = Any
 struct NSplineTerm{T,D} <: AbstractTerm
-term::T
-df::D
+    term::T
+    df::D
 end
 Base.show(io::IO, p::NSplineTerm) = print(io, "ns($(p.term), $(p.df))")
 function StatsModels.apply_schema(t::FunctionTerm{typeof(ns)},
-sch::StatsModels.Schema,
-Mod::Type{<:NSPLINE_CONTEXT})
-apply_schema(NSplineTerm(t.args_parsed...), sch, Mod)
+                                  sch::StatsModels.Schema,
+                                  Mod::Type{<:NSPLINE_CONTEXT})
+    apply_schema(NSplineTerm(t.args_parsed...), sch, Mod)
 end
 function StatsModels.apply_schema(t::NSplineTerm,
-sch::StatsModels.Schema,
-Mod::Type{<:NSPLINE_CONTEXT})
-term = apply_schema(t.term, sch, Mod)
-isa(term, ContinuousTerm) ||
-throw(ArgumentError("NSplineTerm only works with continuous terms (got $term)"))
-isa(t.df, ConstantTerm) ||
-throw(ArgumentError("NSplineTerm df must be a number (got $(t.df))"))
-NSplineTerm(term, t.df.n)
+                                  sch::StatsModels.Schema,
+                                  Mod::Type{<:NSPLINE_CONTEXT})
+    term = apply_schema(t.term, sch, Mod)
+    isa(term, ContinuousTerm) ||
+        throw(ArgumentError("NSplineTerm only works with continuous terms (got $term)"))
+    isa(t.df, ConstantTerm) ||
+        throw(ArgumentError("NSplineTerm df must be a number (got $(t.df))"))
+    NSplineTerm(term, t.df.n)
 end
 function StatsModels.modelcols(p::NSplineTerm, d::NamedTuple)
-col = modelcols(p.term, d)
-Splines2.ns(col, df=p.df,intercept=true)
+    col = modelcols(p.term, d)
+    Splines2.ns(col, df=p.df,intercept=true)
 end
 StatsModels.terms(p::NSplineTerm) = terms(p.term)
 StatsModels.termvars(p::NSplineTerm) = StatsModels.termvars(p.term)
