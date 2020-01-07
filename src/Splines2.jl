@@ -291,6 +291,39 @@ function spline_args(x :: Array{T,1};
     (boundary_knots, interior_knots)
 end
 
+"""
+    bs_(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for B-splines and return a function with signature
+`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+derivative for the splines at `x`.
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
+
+# Examples
+```jldoctest
+julia> Splines2.bs_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
+6×3 Array{Float64,2}:
+ 0.0    0.0    0.0  
+ 0.384  0.096  0.008
+ 0.432  0.288  0.064
+ 0.288  0.432  0.216
+ 0.096  0.384  0.512
+ 0.0    0.0    1.0  
+```
+"""
 function bs_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
@@ -317,10 +350,75 @@ function bs_(x :: Array{T,1};
     eval
 end
 
+"""
+    bs(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for B-splines. 
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
+- `ders :: Int32 = 0`: derivatives of the splines
+
+# Examples
+```jldoctest
+julia> Splines2.bs(collect(0.0:0.2:1.0), df=3)
+6×3 Array{Float64,2}:
+ 0.0    0.0    0.0  
+ 0.384  0.096  0.008
+ 0.432  0.288  0.064
+ 0.288  0.432  0.216
+ 0.096  0.384  0.512
+ 0.0    0.0    1.0  
+```
+"""
 function bs(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
     bs_(x; kwargs...)(x, ders=ders)
 end
 
+"""
+    ns_(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for natural B-splines and return a function with signature
+`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+derivative for the splines at `x`.
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
+
+# Examples
+```jldoctest
+julia> Splines2.ns_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
+6×3 Array{Float64,2}:
+  0.0       0.0        0.0     
+ -0.100444  0.409332  -0.272888
+  0.102383  0.540852  -0.359235
+  0.501759  0.386722  -0.172481
+  0.418872  0.327383   0.217745
+ -0.142857  0.428571   0.714286
+```
+"""
 function ns_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
@@ -346,10 +444,74 @@ function ns_(x :: Array{T,1};
     eval
 end
 
+"""
+    ns(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for natural B-splines. 
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
+- `ders :: Int32 = 0`: derivatives of the splines
+
+# Examples
+```jldoctest
+julia> Splines2.ns(collect(0.0:0.2:1.0), df=3)
+6×3 Array{Float64,2}:
+  0.0       0.0        0.0     
+ -0.100444  0.409332  -0.272888
+  0.102383  0.540852  -0.359235
+  0.501759  0.386722  -0.172481
+  0.418872  0.327383   0.217745
+ -0.142857  0.428571   0.714286
+```
+"""
 function ns(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
     ns_(x; kwargs...)(x, ders=ders)
 end
 
+"""
+    is_(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for I-splines and return a function with signature
+`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+derivative for the splines at `x`.
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+
+# Examples
+```jldoctest
+julia> Splines2.is_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
+6×3 Array{Float64,2}:
+ 0.0     0.0     0.0   
+ 0.1808  0.0272  0.0016
+ 0.5248  0.1792  0.0256
+ 0.8208  0.4752  0.1296
+ 0.9728  0.8192  0.4096
+ 1.0     1.0     1.0   
+```
+"""
 function is_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
@@ -388,10 +550,74 @@ function is_(x :: Array{T,1};
     eval
 end
 
+"""
+    is(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for I-splines. 
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `ders :: Int32 = 0`: derivatives of the splines
+
+# Examples
+```jldoctest
+julia> Splines2.is(collect(0.0:0.2:1.0), df=3)
+6×3 Array{Float64,2}:
+ 0.0     0.0     0.0   
+ 0.1808  0.0272  0.0016
+ 0.5248  0.1792  0.0256
+ 0.8208  0.4752  0.1296
+ 0.9728  0.8192  0.4096
+ 1.0     1.0     1.0   
+```
+"""
 function is(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
     is_(x; kwargs...)(x, ders=ders)
 end
 
+"""
+    ms_(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for M-splines and return a function with signature
+`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+derivative for the splines at `x`.
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
+
+# Examples
+```jldoctest
+julia> Splines2.ms_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
+6×3 Array{Float64,2}:
+ 0.0    0.0    0.0  
+ 1.536  0.384  0.032
+ 1.728  1.152  0.256
+ 1.152  1.728  0.864
+ 0.384  1.536  2.048
+ 0.0    0.0    4.0  
+```
+"""
 function ms_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
@@ -429,6 +655,38 @@ function ms_(x :: Array{T,1};
     eval
 end
 
+"""
+    ms(x :: Array{T,1}; <keyword arguments>) where T<:Real
+
+Calculate a basis for M-splines. 
+
+The keyword arguments include one of:
+1. `df`, possibly in combination with `intercept`
+2. `boundary_knots` and `interior_knots`
+3. `knots`
+
+# Arguments
+- `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
+- `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
+- `order :: Int32 = 4`: order of the spline
+- `intercept :: Bool = false`: bool for whether to include an intercept
+- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
+- `ders :: Int32 = 0`: derivatives of the splines
+
+# Examples
+```jldoctest
+julia> Splines2.ms(collect(0.0:0.2:1.0), df=3)
+6×3 Array{Float64,2}:
+ 0.0    0.0    0.0  
+ 1.536  0.384  0.032
+ 1.728  1.152  0.256
+ 1.152  1.728  0.864
+ 0.384  1.536  2.048
+ 0.0    0.0    4.0  
+```
+"""
 function ms(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
     ms_(x; kwargs...)(x, ders=ders)
 end
