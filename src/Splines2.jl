@@ -1,6 +1,6 @@
 module Splines2
 
-# exports
+export ns, ns_, bs, bs_, is, is_, ms, ms_
 
 using OffsetArrays
 using LinearAlgebra
