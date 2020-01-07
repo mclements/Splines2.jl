@@ -6,9 +6,7 @@ A [Julia](https://julialang.org/) package for regression splines. The package cu
 
 The package is not currently registered. Installation from GitHub:
 
-``` julia
 	using Pkg; Pkg.add(PackageSpec(url = "https://github.com/mclements/Splines2.jl"))
-```
 
 ## Usage
 
