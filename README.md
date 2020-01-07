@@ -16,7 +16,7 @@ Exported functions include `Splines2.bs`, `Splines2.ns`, `Splines2.ms` and `Spli
 
 ### Documentation for `Splines2.bs`
 
-	`bs(x :: Array{T,1}; <keyword arguments>) where T<:Real`
+	bs(x :: Array{T,1}; <keyword arguments>) where T<:Real
 
 Calculate a basis for B-splines. 
 
@@ -39,7 +39,7 @@ The keyword arguments include one of:
 
 ### Documentation for `Splines2.bs_`
 
-    `bs_(x :: Array{T,1}; <keyword arguments>) where T<:Real`
+    bs_(x :: Array{T,1}; <keyword arguments>) where T<:Real
 
 Calculate a basis for B-splines and return a function with signature
 `(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
