@@ -309,7 +309,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 
 # Examples
@@ -366,7 +366,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 - `ders :: Int32 = 0`: derivatives of the splines
 
@@ -404,7 +404,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 
 # Examples
@@ -460,7 +460,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 - `ders :: Int32 = 0`: derivatives of the splines
 
@@ -498,7 +498,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 
 # Examples
 ```jldoctest
@@ -566,7 +566,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `ders :: Int32 = 0`: derivatives of the splines
 
 # Examples
@@ -603,7 +603,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 
 # Examples
@@ -671,7 +671,7 @@ The keyword arguments include one of:
 - `order :: Int32 = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
 - `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
-- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots
+- `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 - `ders :: Int32 = 0`: derivatives of the splines
 
