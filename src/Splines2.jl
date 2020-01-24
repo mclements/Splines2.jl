@@ -13,12 +13,12 @@ zeroArray(a :: Array{T}) where T<:Real = OffsetArray(a,(size(a).*0).-1)
 abstract type AbstractSplineBasis{T<:Real} end
 # Note: we have used OffsetArray for converting from C code
 mutable struct SplineBasis{T<:Real} <: AbstractSplineBasis{T}
-    order::Int32 # order of the spline
-    ordm1::Int32 # order -1 (3 for cubic splines
-    nknots::Int32 # number of knots
-    curs::Int32 # current position in knots vector
-    boundary::Int32 
-    ncoef::Int32 # number of coefficients
+    order::Int # order of the spline
+    ordm1::Int # order -1 (3 for cubic splines
+    nknots::Int # number of knots
+    curs::Int # current position in knots vector
+    boundary::Int 
+    ncoef::Int # number of coefficients
     ldel::OffsetArray{T,1} # differences from knots on the left
     rdel::OffsetArray{T,1} # differences from knots on the right
     knots::OffsetArray{T,1} # knot vector
@@ -29,7 +29,7 @@ mutable struct BSplineBasis{T<:Real} <: AbstractSplineBasis{T}
     boundary_knots::Tuple{T,T}
     interior_knots::Union{Array{T,1}, Nothing}
     intercept::Bool
-    df::Int32
+    df::Int
 end
 mutable struct NSplineBasis{T<:Real} <: AbstractSplineBasis{T}
     b_spline_basis::BSplineBasis{T}
@@ -41,7 +41,7 @@ mutable struct NSplineBasis{T<:Real} <: AbstractSplineBasis{T}
 end
 
 # constructors
-function SplineBasis(knots :: Array{T,1}, order :: Int32 = 4) where T<:Real
+function SplineBasis(knots :: Array{T,1}, order :: Int = 4) where T<:Real
     ordm1 = order -1 
     SplineBasis(order,
                 ordm1,
@@ -56,10 +56,10 @@ function SplineBasis(knots :: Array{T,1}, order :: Int32 = 4) where T<:Real
 end
 function BSplineBasis(boundary_knots :: Tuple{T,T},
                       interior_knots :: Union{Array{T,1}, Nothing} = nothing,
-                      order :: Int32 = 4,
+                      order :: Int = 4,
                       intercept :: Bool = false) where T<:Real
     l_interior_knots = interior_knots == nothing ? 0 : length(interior_knots)
-    df = Int32(intercept) + order - 1 + l_interior_knots
+    df = Int(intercept) + order - 1 + l_interior_knots
     nknots = l_interior_knots + 2*order
     ncoef = nknots - order
     knots = zeros(T,nknots)
@@ -76,7 +76,7 @@ function BSplineBasis(boundary_knots :: Tuple{T,T},
 end
 function NSplineBasis(boundary_knots :: Tuple{T,T},
                       interior_knots :: Union{Array{T,1}, Nothing} = nothing,
-                      order :: Int32 = 4,
+                      order :: Int = 4,
                       intercept :: Bool = false) :: NSplineBasis{T} where T<:Real
     bs = BSplineBasis(boundary_knots,interior_knots,order,intercept)
     co = basis(bs,[bs.boundary_knots[1],bs.boundary_knots[2]],2)
@@ -91,7 +91,7 @@ function NSplineBasis(boundary_knots :: Tuple{T,T},
                  tl0,tl1,tr0,tr1)
 end
 
-function basis(bs :: SplineBasis{T}, x :: T, ders :: Int32 = 0) where T<:Real
+function basis(bs :: SplineBasis{T}, x :: T, ders :: Int = 0) where T<:Real
     function set_cursor!(x :: T)
         bs.curs = -1
         bs.boundary = T(0)
@@ -112,7 +112,7 @@ function basis(bs :: SplineBasis{T}, x :: T, ders :: Int32 = 0) where T<:Real
         end
         return bs.curs
     end
-    function diff_table!(x :: T, ndiff :: Int32)
+    function diff_table!(x :: T, ndiff :: Int)
         for i = 0:(ndiff-1)
 	    bs.rdel[i] = bs.knots[bs.curs + i] - x
 	    bs.ldel[i] = x - bs.knots[bs.curs - (i + 1)]
@@ -200,7 +200,7 @@ function basis(bs :: SplineBasis{T}, x :: T, ders :: Int32 = 0) where T<:Real
     return parent(val)
 end
 
-function basis(bs :: BSplineBasis{T}, x :: T, ders :: Int32 = 0) where T<:Real
+function basis(bs :: BSplineBasis{T}, x :: T, ders :: Int = 0) where T<:Real
     if (x < bs.boundary_knots[1] || x > bs.boundary_knots[2])
         if (x < bs.boundary_knots[1])
             k_pivot = T(0.75)*bs.boundary_knots[1]+
@@ -236,7 +236,7 @@ function basis(bs :: BSplineBasis{T}, x :: T, ders :: Int32 = 0) where T<:Real
     vec
 end
 
-function basis(ns :: NSplineBasis{T}, x::T, ders :: Int32 = 0) where T<:Real
+function basis(ns :: NSplineBasis{T}, x::T, ders :: Int = 0) where T<:Real
     if (x < ns.b_spline_basis.boundary_knots[1])
         if (ders==0)
             return(ns.tl0 + (x - ns.b_spline_basis.boundary_knots[1])*ns.tl1)
@@ -258,7 +258,7 @@ function basis(ns :: NSplineBasis{T}, x::T, ders :: Int32 = 0) where T<:Real
     end
 end
 
-function basis(bs :: AbstractSplineBasis{T}, x :: Array{T,1}, ders :: Int32 = 0) where T<:Real
+function basis(bs :: AbstractSplineBasis{T}, x :: Array{T,1}, ders :: Int = 0) where T<:Real
     f(xi) = basis(bs, xi, ders)
     copy(transpose(reduce(hcat, f.(x))))
 end
@@ -267,11 +267,11 @@ end
 function spline_args(x :: Array{T,1};
                      boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
                      interior_knots :: Union{Array{T,1},Nothing} = nothing,
-                     order :: Int32 = 4,
+                     order :: Int = 4,
                      intercept :: Bool = false,
-                     df :: Int32 = 3 + Int32(intercept),
+                     df :: Int = 3 + Int(intercept),
                      knots :: Union{Array{T,1}, Nothing} = nothing,
-                     knots_offset :: Int32 = 0) where T<:Real
+                     knots_offset :: Int = 0) where T<:Real
     if (interior_knots != nothing && boundary_knots != nothing)
         # pass
     elseif (knots != nothing)
@@ -281,7 +281,7 @@ function spline_args(x :: Array{T,1};
         if (boundary_knots == nothing)
             boundary_knots = extrema(x)
         end
-        iKnots = df - order + knots_offset + 1 - Int32(intercept)
+        iKnots = df - order + knots_offset + 1 - Int(intercept)
         if (iKnots>0)
             p = range(T(0), length=iKnots+2, stop=T(1))[2:(iKnots+1)]
             index = (x .>= boundary_knots[1]) .* (x .<= boundary_knots[2])
@@ -295,7 +295,7 @@ end
     bs_(x :: Array{T,1}; <keyword arguments>) where T<:Real
 
 Calculate a basis for B-splines and return a function with signature
-`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+`(x:: Array{T,1}; ders :: Int = 0)` for evaluation of `ders`
 derivative for the splines at `x`.
 
 The keyword arguments include one of:
@@ -306,9 +306,9 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 
@@ -327,9 +327,9 @@ julia> Splines2.bs_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
 function bs_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
-            order :: Int32 = 4,
+            order :: Int = 4,
             intercept :: Bool = false,
-            df :: Int32 = order - 1 + Int32(intercept),
+            df :: Int = order - 1 + Int(intercept),
             knots :: Union{Array{T,1}, Nothing} = nothing,
             centre :: Union{T,Nothing} = nothing) where T<:Real
     (boundary_knots, interior_knots) =
@@ -337,7 +337,7 @@ function bs_(x :: Array{T,1};
                     order=order, intercept=intercept,
                     df=df, knots=knots)
     spline = BSplineBasis(boundary_knots, interior_knots, order, intercept)
-    function eval(x :: Array{T,1}; ders :: Int32 = 0)
+    function eval(x :: Array{T,1}; ders :: Int = 0)
         b = basis(spline, x, ders)
         if (centre != nothing && ders==0)
             bc = basis(spline, centre, ders)
@@ -363,12 +363,12 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
-- `ders :: Int32 = 0`: derivatives of the splines
+- `ders :: Int = 0`: derivatives of the splines
 
 # Examples
 ```jldoctest
@@ -382,7 +382,7 @@ julia> Splines2.bs(collect(0.0:0.2:1.0), df=3)
  0.0    0.0    1.0  
 ```
 """
-function bs(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
+function bs(x :: Array{T,1}; ders :: Int = 0, kwargs...) where T<:Real
     bs_(x; kwargs...)(x, ders=ders)
 end
 
@@ -390,7 +390,7 @@ end
     ns_(x :: Array{T,1}; <keyword arguments>) where T<:Real
 
 Calculate a basis for natural B-splines and return a function with signature
-`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+`(x:: Array{T,1}; ders :: Int = 0)` for evaluation of `ders`
 derivative for the splines at `x`.
 
 The keyword arguments include one of:
@@ -401,9 +401,9 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 
@@ -422,16 +422,16 @@ julia> Splines2.ns_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
 function ns_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
-            order :: Int32 = 4,
+            order :: Int = 4,
             intercept :: Bool = false,
-            df :: Int32 = order - 3 + Int32(intercept),
+            df :: Int = order - 3 + Int(intercept),
             knots :: Union{Array{T,1}, Nothing} = nothing,
             centre :: Union{T,Nothing} = nothing) where T<:Real
     (boundary_knots, interior_knots) =
         spline_args(x, boundary_knots=boundary_knots, interior_knots=interior_knots,
                     order=order, intercept=intercept, df=df, knots=knots, knots_offset=2)
     spline = NSplineBasis(boundary_knots, interior_knots, order, intercept)
-    function eval(x :: Array{T,1}; ders :: Int32 = 0)
+    function eval(x :: Array{T,1}; ders :: Int = 0)
         b = basis(spline, x, ders)
         if (centre != nothing && ders==0)
             bc = basis(spline, centre, ders)
@@ -457,12 +457,12 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
-- `ders :: Int32 = 0`: derivatives of the splines
+- `ders :: Int = 0`: derivatives of the splines
 
 # Examples
 ```jldoctest
@@ -476,7 +476,7 @@ julia> Splines2.ns(collect(0.0:0.2:1.0), df=3)
  -0.142857  0.428571   0.714286
 ```
 """
-function ns(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
+function ns(x :: Array{T,1}; ders :: Int = 0, kwargs...) where T<:Real
     ns_(x; kwargs...)(x, ders=ders)
 end
 
@@ -484,7 +484,7 @@ end
     is_(x :: Array{T,1}; <keyword arguments>) where T<:Real
 
 Calculate a basis for I-splines and return a function with signature
-`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+`(x:: Array{T,1}; ders :: Int = 0)` for evaluation of `ders`
 derivative for the splines at `x`.
 
 The keyword arguments include one of:
@@ -495,9 +495,9 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 
 # Examples
@@ -515,9 +515,9 @@ julia> Splines2.is_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
 function is_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
-            order :: Int32 = 4,
+            order :: Int = 4,
             intercept :: Bool = false,
-            df :: Int32 = order - 1 + Int32(intercept),
+            df :: Int = order - 1 + Int(intercept),
             knots :: Union{Array{T,1}, Nothing} = nothing) where T<:Real
     (boundary_knots, interior_knots) =
         spline_args(x, boundary_knots=boundary_knots, order=order+1,
@@ -525,7 +525,7 @@ function is_(x :: Array{T,1};
     spline = BSplineBasis(boundary_knots, interior_knots, order+1, false)
     knots = parent(spline.spline_basis.knots)
     findj(x) = interior_knots==nothing ? (order+1) : searchsortedlast(knots,x)
-    function eval(x :: Array{T,1}; ders :: Int32 = 0)
+    function eval(x :: Array{T,1}; ders :: Int = 0)
         b = basis(spline,x,ders)
         (nrow,ncol) = size(b)
         for i=1:nrow
@@ -563,11 +563,11 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
-- `ders :: Int32 = 0`: derivatives of the splines
+- `ders :: Int = 0`: derivatives of the splines
 
 # Examples
 ```jldoctest
@@ -581,7 +581,7 @@ julia> Splines2.is(collect(0.0:0.2:1.0), df=3)
  1.0     1.0     1.0   
 ```
 """
-function is(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
+function is(x :: Array{T,1}; ders :: Int = 0, kwargs...) where T<:Real
     is_(x; kwargs...)(x, ders=ders)
 end
 
@@ -589,7 +589,7 @@ end
     ms_(x :: Array{T,1}; <keyword arguments>) where T<:Real
 
 Calculate a basis for M-splines and return a function with signature
-`(x:: Array{T,1}; ders :: Int32 = 0)` for evaluation of `ders`
+`(x:: Array{T,1}; ders :: Int = 0)` for evaluation of `ders`
 derivative for the splines at `x`.
 
 The keyword arguments include one of:
@@ -600,9 +600,9 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 
@@ -621,16 +621,16 @@ julia> Splines2.ms_(collect(0.0:0.2:1.0), df=3)(collect(0.0:0.2:1.0))
 function ms_(x :: Array{T,1};
             boundary_knots :: Union{Tuple{T,T},Nothing} = nothing,
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
-            order :: Int32 = 4,
+            order :: Int = 4,
             intercept :: Bool = false,
-            df :: Int32 = order - 1 + Int32(intercept),
+            df :: Int = order - 1 + Int(intercept),
             knots :: Union{Array{T,1}, Nothing} = nothing,
             centre :: Union{T,Nothing} = nothing) where T<:Real
     (boundary_knots, interior_knots) =
         spline_args(x, boundary_knots=boundary_knots, interior_knots=interior_knots,
                     order=order, intercept=intercept, df=df, knots=knots)
     spline = BSplineBasis(boundary_knots, interior_knots, order, intercept)
-    function eval(x :: Array{T,1}; ders :: Int32 = 0)
+    function eval(x :: Array{T,1}; ders :: Int = 0)
         b = basis(spline, x, ders)
         knots = parent(spline.spline_basis.knots)
         function loop(j)
@@ -668,12 +668,12 @@ The keyword arguments include one of:
 # Arguments
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
-- `order :: Int32 = 4`: order of the spline
+- `order :: Int = 4`: order of the spline
 - `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int32 = order - 1 + Int32(intercept)`: degrees of freedom
+- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
-- `ders :: Int32 = 0`: derivatives of the splines
+- `ders :: Int = 0`: derivatives of the splines
 
 # Examples
 ```jldoctest
@@ -687,7 +687,7 @@ julia> Splines2.ms(collect(0.0:0.2:1.0), df=3)
  0.0    0.0    4.0  
 ```
 """
-function ms(x :: Array{T,1}; ders :: Int32 = 0, kwargs...) where T<:Real
+function ms(x :: Array{T,1}; ders :: Int = 0, kwargs...) where T<:Real
     ms_(x; kwargs...)(x, ders=ders)
 end
 
