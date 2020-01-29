@@ -1,4 +1,4 @@
-# Splines.jl package for regression splines
+# Splines2.jl package for regression splines
 
 A [Julia](https://julialang.org/) package for regression splines. The package currently includes B-splines, natural B-splines, M-splines and I-splines.
 
