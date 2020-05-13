@@ -147,10 +147,10 @@ function basis(bs :: BSplineBasis{T}, x :: T, ders :: Int = 0) where T<:Real
     if (x < bs.boundary_knots[1] || x > bs.boundary_knots[2])
         if (x < bs.boundary_knots[1])
             k_pivot = T(0.75)*bs.boundary_knots[1]+
-            T(0.25)*bs.spline_basis.knots[5-1] # 0-based
+            T(0.25)*bs.spline_basis.knots[bs.spline_basis.order+1-1] # 0-based
         else
             k_pivot = T(0.75)*bs.boundary_knots[2]+
-            T(0.25)*bs.spline_basis.knots[length(bs.spline_basis.knots)-4-1] # 0-based
+            T(0.25)*bs.spline_basis.knots[length(bs.spline_basis.knots)-bs.spline_basis.order-1-1] # 0-based
         end
         delta = x - k_pivot
         if (ders==0)
