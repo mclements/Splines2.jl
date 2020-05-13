@@ -484,7 +484,7 @@ function is_(x :: Array{T,1};
                 end
             end
             for j in ncol:-1:1
-                if j < js-(order+1)
+                if j < js-(order+1) && der==0
                     b[i,j]=T(1)
                 end
             end
