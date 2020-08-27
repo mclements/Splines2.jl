@@ -440,8 +440,8 @@ The keyword arguments include one of:
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
 - `order :: Int = 4`: order of the spline
-- `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
+- `intercept :: Bool = false`: bool for whether to include an intercept (column of ones). This behaviour is different to the splines2 package from R, where intercept=FALSE will drop the first spline term.
+- `df :: Int = order + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 
 # Examples
@@ -461,11 +461,11 @@ function is_(x :: Array{T,1};
             interior_knots :: Union{Array{T,1},Nothing} = nothing,
             order :: Int = 4,
             intercept :: Bool = false,
-            df :: Int = order - 1 + Int(intercept),
+            df :: Int = order + Int(intercept),
             knots :: Union{Array{T,1}, Nothing} = nothing) where T<:Real
     (boundary_knots, interior_knots) =
         spline_args(x, boundary_knots=boundary_knots, order=order+1,
-                    intercept=intercept, df=df+1, knots=knots)
+                    intercept=intercept, df=df, knots=knots)
     spline = BSplineBasis(boundary_knots, interior_knots, order+1, false)
     knots = parent(spline.spline_basis.knots)
     findj(x) = interior_knots==nothing ? (order+1) : searchsortedlast(knots,x)
@@ -489,7 +489,7 @@ function is_(x :: Array{T,1};
                 end
             end
         end
-        intercept ? b : b[:, 2:size(b,2)]
+        intercept ? [ones(T, nrow) b] : b
     end
     eval
 end
@@ -545,8 +545,8 @@ The keyword arguments include one of:
 - `boundary_knots :: Union{Tuple{T,T},Nothing} = nothing`: boundary knots
 - `interior_knots :: Union{Array{T,1},Nothing} = nothing`: interior knots
 - `order :: Int = 4`: order of the spline
-- `intercept :: Bool = false`: bool for whether to include an intercept
-- `df :: Int = order - 1 + Int(intercept)`: degrees of freedom
+- `intercept :: Bool = false`: bool for whether to include an intercept (column of ones). This behaviour is different to the splines2 package from R, where intercept=FALSE will drop the first spline term.
+- `df :: Int = order + Int(intercept)`: degrees of freedom
 - `knots :: Union{Array{T,1}, Nothing} = nothing`: full set of knots (excluding repeats)
 - `centre :: Union{T,Nothing} = nothing)`: value to centre the splines
 

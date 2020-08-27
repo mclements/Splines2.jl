@@ -2,6 +2,11 @@
 
 A [Julia](https://julialang.org/) package for regression splines. The package currently includes B-splines, natural B-splines, M-splines and I-splines.
 
+## News
+### Version 0.2.0:
+- Mainly bug fixes.
+- A change of behaviour for `Splines2.is_` and `Splines2.is`: `intercept=true` will include a columns of ones, while the default `intercept=false` will keep _all_ of the spline terms, but exclude the column of ones. This behaviour is different to the `splines2` package in R, which will give all of the spline terms for `intercept=TRUE` and drop the first spline term for `intercept=FALSE`.
+
 ## Installation
 
 The package is not currently registered. Installation from GitHub:
@@ -117,20 +122,20 @@ julia> ns(x, boundary_knots=(0.0,1.0), interior_knots=[0.2])
  -1.43333   -1.74444     0.862963  3.85802  
  -1.44      -1.92       -0.64      6.66667
  
- julia> is(x, df=3)
+ julia> is(x, df=4)
 
-11×3 Array{Float64,2}:
- 0.0     0.0     0.0   
- 0.0523  0.0037  0.0001
- 0.1808  0.0272  0.0016
- 0.3483  0.0837  0.0081
- 0.5248  0.1792  0.0256
- 0.6875  0.3125  0.0625
- 0.8208  0.4752  0.1296
- 0.9163  0.6517  0.2401
- 0.9728  0.8192  0.4096
- 0.9963  0.9477  0.6561
- 1.0     1.0     1.0
+11×4 Array{Float64,2}:
+ 0.0     0.0     0.0     0.0   
+ 0.3439  0.0523  0.0037  0.0001
+ 0.5904  0.1808  0.0272  0.0016
+ 0.7599  0.3483  0.0837  0.0081
+ 0.8704  0.5248  0.1792  0.0256
+ 0.9375  0.6875  0.3125  0.0625
+ 0.9744  0.8208  0.4752  0.1296
+ 0.9919  0.9163  0.6517  0.2401
+ 0.9984  0.9728  0.8192  0.4096
+ 0.9999  0.9963  0.9477  0.6561
+ 1.0     1.0     1.0     1.0   
 ```
 
 We also provide functions that return a function for evaluating spline bases with a function signature `(x::Array{T<:Real,1}; ders::Int32 = 0)`. These are useful for "safe" predictions in regression modelling. As an example:
@@ -244,3 +249,5 @@ julia> predict(fit2, DataFrames.DataFrame(x=newx)) # unsafe predictions!
  -0.7710405835443831 
   0.1787886772299305
 ```
+
+For further details, see the discussion [here](https://discourse.julialang.org/t/safe-predictions-using-formula-and-regression-splines/33057).
