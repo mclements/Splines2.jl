@@ -1,7 +1,7 @@
 name = "Splines2"
 uuid = "5a560754-308a-11ea-3701-ef72685e98d6"
 authors = ["Mark Clements <mark.clements@ki.se>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
