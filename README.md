@@ -9,10 +9,10 @@ A [Julia](https://julialang.org/) package for regression splines. The package cu
 
 ## Installation
 
-The package is not currently registered. Installation from GitHub:
+The package is registered on JuliaHub. For installation:
 
 ``` julia
-using Pkg; Pkg.add(PackageSpec(url = "https://github.com/mclements/Splines2.jl"))
+using Pkg; Pkg.add("Splines2")
 ```
 
 ## Usage
