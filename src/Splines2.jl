@@ -464,7 +464,7 @@ function is_(x :: Array{T,1};
             df :: Int = order + Int(intercept),
             knots :: Union{Array{T,1}, Nothing} = nothing) where T<:Real
     (boundary_knots, interior_knots) =
-        spline_args(x, boundary_knots=boundary_knots, order=order+1,
+        spline_args(x, boundary_knots=boundary_knots, interior_knots=interior_knots, order=order+1,
                     intercept=intercept, df=df, knots=knots)
     spline = BSplineBasis(boundary_knots, interior_knots, order+1, false)
     knots = parent(spline.spline_basis.knots)
