@@ -1,0 +1,45 @@
+name: CI
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+on:
+  push:
+    branches:
+      - main
+      - master
+      - release-v*
+    paths-ignore:
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    branches:
+      - main
+      - master
+      - release-v*
+    paths-ignore:
+      - 'LICENSE.md'
+      - 'README.md'
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        version: [min, 1]
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Julia Setup
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.version }}
+      - name: Cache
+        uses: julia-actions/cache@v3
+      - name: Test
+        uses: julia-actions/julia-runtest@v1
+      # - name: Coverage Process
+      #   uses: julia-actions/julia-processcoverage@v1
+      # - name: Coverage Upload
+      #   uses: codecov/codecov-action@v5
+      #   env:
+      #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
