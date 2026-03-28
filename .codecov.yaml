@@ -1,0 +1,10 @@
+---
+comment: true
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: Splines2
+      paths:
+        - src/**
+        - ext/**

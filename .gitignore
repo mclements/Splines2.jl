@@ -27,3 +27,6 @@ Manifest-v*.toml
 # Editor files
 .vscode/*
 *~
+lcov.info
+*.swp
+

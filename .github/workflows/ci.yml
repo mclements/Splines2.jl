@@ -1,7 +1,10 @@
 name: CI
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  # group by workflow and ref; the last slightly strange component ensures that for pull
+  # requests, we limit to 1 concurrent job, but for the main branch we don't
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref != 'refs/heads/main' || github.run_number }}
+  # Cancel intermediate builds, but only if it is a pull request build.
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 on:
   push:
     branches:
@@ -24,22 +27,41 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        version: [min, 1]
-        os: [ubuntu-latest, macos-latest]
+        version: 
+          - min
+          - 1
+        os: 
+          - ubuntu-latest
+          - macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Julia Setup
-        uses: julia-actions/setup-julia@v2
+        uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9 # v2.7.0
         with:
           version: ${{ matrix.version }}
       - name: Cache
-        uses: julia-actions/cache@v3
+        uses: julia-actions/cache@e97f6fc1a6e21c82253c85e269be7340376aa425 # v3.0.1
       - name: Test
-        uses: julia-actions/julia-runtest@v1
-      # - name: Coverage Process
-      #   uses: julia-actions/julia-processcoverage@v1
-      # - name: Coverage Upload
-      #   uses: codecov/codecov-action@v5
-      #   env:
-      #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        uses: julia-actions/julia-runtest@d60b785c6f2bdf4ebfb18b2b6f7d93b7dfb0efe3 # v1.11.4
+      - name: Coverage Process
+        uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # latest
+      - name: Coverage Upload
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Cache
+        uses: julia-actions/cache@e97f6fc1a6e21c82253c85e269be7340376aa425 # v3.0.1
+      - name: Build
+        uses: julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1 # v1.7.0
+      - name: Document
+        uses: julia-actions/julia-docdeploy@e62cc8fd639797a0c2922a437d5b1b81c4a12787 # v1.3.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
