@@ -16,7 +16,7 @@ end
 function basis(is::ISplineBasis{T}, x::T, derivs::Int=0) where {T<:Real}
     vec = basis(is.b_spline_basis, x, derivs)
     order = is.order
-    knots = parent(is.b_spline_basis.spline_basis.knots)
+    knots = is.b_spline_basis.spline_basis.knots
     js = isnothing(is.interior_knots) ? (order + 1) : searchsortedlast(knots, x)
     ncol = length(vec)
     for j in ncol:-1:1

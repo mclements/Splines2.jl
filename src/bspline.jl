@@ -37,11 +37,11 @@ function basis(bs::BSplineBasis{T}, x::T, derivs::Int=0) where {T<:Real}
     else # outside of the boundary knots
         if x < bs.boundary_knots[1]
             k_pivot = T(0.75) * bs.boundary_knots[1] +
-                      T(0.25) * bs.spline_basis.knots[bs.spline_basis.order + 1 - 1] # 0-based
+                      T(0.25) * bs.spline_basis.knots[bs.spline_basis.order + 1]
         else
             k_pivot = T(0.75) * bs.boundary_knots[2] +
                       T(0.25) *
-                      bs.spline_basis.knots[length(bs.spline_basis.knots) - bs.spline_basis.order - 1 - 1] # 0-based
+                      bs.spline_basis.knots[length(bs.spline_basis.knots) - bs.spline_basis.order - 1]
         end
         delta = x - k_pivot
         if derivs == 0
