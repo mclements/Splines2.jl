@@ -179,75 +179,50 @@ julia> predict(fit1, ns1(newx)) # safe predictions
 
 ## Using `Splines2` with `@formula`
 
-We provide code below for using the `Splines2` package with `@formula`. Note that these do *not* provide "safe" predictions.
+We provide code below for using the `Splines2` package with `@formula`.
 
 ``` julia
 using StatsModels
 ns(x,df) = Splines2.ns(x,df=df,intercept=true) # assumes intercept
-const NSPLINE_CONTEXT = Any
-struct NSplineTerm{T,D} <: AbstractTerm
+const SPLINE_CONTEXT = Any
+
+mutable struct NSplineTerm{T,D} <: AbstractTerm
     term::T
     df::D
+    basis::Union{Function,Nothing}
 end
+
 Base.show(io::IO, p::NSplineTerm) = print(io, "ns($(p.term), $(p.df))")
 function StatsModels.apply_schema(t::FunctionTerm{typeof(ns)},
                                   sch::StatsModels.Schema,
-                                  Mod::Type{<:NSPLINE_CONTEXT})
-    apply_schema(NSplineTerm(t.args_parsed...), sch, Mod)
+                                  Mod::Type{<:SPLINE_CONTEXT})
+    length(t.args) == 2 || error("Incorrect number of arguments to ns")
+    return apply_schema(NSplineTerm(t.args[1], t.args[2], nothing), sch, Mod)
 end
+
 function StatsModels.apply_schema(t::NSplineTerm,
                                   sch::StatsModels.Schema,
-                                  Mod::Type{<:NSPLINE_CONTEXT})
+                                  Mod::Type{<:SPLINE_CONTEXT})
     term = apply_schema(t.term, sch, Mod)
     isa(term, ContinuousTerm) ||
         throw(ArgumentError("NSplineTerm only works with continuous terms (got $term)"))
     isa(t.df, ConstantTerm) ||
         throw(ArgumentError("NSplineTerm df must be a number (got $(t.df))"))
-    NSplineTerm(term, t.df.n)
+    return NSplineTerm(term, t.df.n, t.basis)
 end
-function StatsModels.modelcols(p::NSplineTerm, d::NamedTuple)
+
+function StatsModels.modelcols(p::NSplineTerm{<:ContinuousTerm, <:Integer}, d::NamedTuple)
     col = modelcols(p.term, d)
-    Splines2.ns(col, df=p.df,intercept=true)
+    if isnothing(p.basis)
+        p.basis = Splines2.ns_(col; df=p.df)
+    end
+    return p.basis(col)
 end
+
 StatsModels.terms(p::NSplineTerm) = terms(p.term)
 StatsModels.termvars(p::NSplineTerm) = StatsModels.termvars(p.term)
 StatsModels.width(p::NSplineTerm) = 1
-StatsModels.coefnames(p::NSplineTerm) = "ns(" .* coefnames(p.term) .* "," .* string.(1:p.df) .* ")"
+function StatsModels.coefnames(p::NSplineTerm)
+    return string.("ns(", coefnames(p.term), ", ",  1:p.df, ")")
+end
 ```
-
-To show that this is not safe:
-
-``` julia
-julia> using DataFrames
-julia> d = DataFrames.DataFrame(x=x,y=y);
-julia> fit2 = lm(@formula(y~ns(x,5)+0),d) # equivalent to fit1 with nicer labels
-
-StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Array{Float64,1}},GLM.DensePredChol{Float64,LinearAlgebra.Cholesky{Float64,Array{Float64,2}}}},Array{Float64,2}}
-
-y ~ 0 + ns(x, 5)
-
-Coefficients:
-─────────────────────────────────────────────────────────────────────────
-          Estimate  Std. Error    t value  Pr(>|t|)  Lower 95%  Upper 95%
-─────────────────────────────────────────────────────────────────────────
-ns(x,1)   1.23751     0.269035   4.59981     <1e-5    0.708047   1.76698 
-ns(x,2)   0.12448     0.249256   0.499407    0.6179  -0.366058   0.615018
-ns(x,3)  -1.89278     0.256808  -7.37043     <1e-11  -2.39819   -1.38738 
-ns(x,4)   0.187169    0.22469    0.833012    0.4055  -0.255023   0.629361
-ns(x,5)  -0.240554    0.254986  -0.943404    0.3462  -0.742369   0.26126 
-─────────────────────────────────────────────────────────────────────────
-
-julia> predict(fit2, DataFrames.DataFrame(x=newx)) # unsafe predictions!
-
-8-element Array{Union{Missing, Float64},1}:
-  0.29827578383334535
-  0.7976143687096604 
-  0.8964195213823501 
-  0.40991870738161984
- -0.4167421148184624 
- -1.0400611367418444 
- -0.7710405835443831 
-  0.1787886772299305
-```
-
-For further details, see the discussion [here](https://discourse.julialang.org/t/safe-predictions-using-formula-and-regression-splines/33057).
