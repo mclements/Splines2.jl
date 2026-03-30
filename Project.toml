@@ -1,6 +1,6 @@
 name = "Splines2"
 uuid = "5a560754-308a-11ea-3701-ef72685e98d6"
-authors = ["Mark Clements <mark.clements@ki.se>"]
+authors = ["Mark Clements <mark.clements@ki.se>", "Phillip Alday <me@phillipalday.com"]
 version = "0.2.2"
 
 [deps]
