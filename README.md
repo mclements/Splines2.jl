@@ -15,6 +15,11 @@
 A [Julia](https://julialang.org/) package for regression splines. The package currently includes B-splines, natural B-splines, M-splines and I-splines.
 
 ## News
+
+### Version 0.3.0
+- Support for safe predictions in `StatsModels.@formula` for natural splines.
+- Substantial refactoring of internal code to use callable types.
+
 ### Version 0.2.0:
 - Mainly bug fixes.
 - A change of behaviour for `Splines2.is_` and `Splines2.is`: `intercept=true` will include a columns of ones, while the default `intercept=false` will keep _all_ of the spline terms, but exclude the column of ones. This behaviour is different to the `splines2` package in R, which will give all of the spline terms for `intercept=TRUE` and drop the first spline term for `intercept=FALSE`.
