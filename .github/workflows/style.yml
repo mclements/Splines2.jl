@@ -20,7 +20,7 @@ jobs:
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@v3
       - name: Install JuliaFormatter
         shell: julia --project=@format --color=yes {0}
         run: |
