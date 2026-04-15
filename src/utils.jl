@@ -1,17 +1,11 @@
-zeroIndexedArray(a::Array{T}) where {T<:Real} = OffsetArray(a, Tuple(fill(-1, ndims(a))))
-
 function _find_interval(bs::SplineBasis{T}, x::T) where {T<:Real}
     k = bs.order - 1
     n = bs.nknots - k - 1
-    l = k
-    while x < bs.knots[l] && l != k
-        l = l - 1
-    end
-    l = l + 1
-    while x >= bs.knots[l] && l != n
+    l = k + 1
+    while x >= bs.knots[l + 1] && l != n
         l = l + 1
     end
-    return l - 1
+    return l
 end
 
 """

@@ -1,17 +1,15 @@
-# the original Splines2 implementation used zero-indexed OffsetArrays
-# to ease the port from C
 struct SplineBasis{T<:Real} <: AbstractSplineBasis{T}
     order::Int # order of the spline
     nknots::Int # number of knots
     ncoef::Int # number of coefficients
-    knots::OffsetArray{T,1} # knot vector
+    knots::Vector{T} # knot vector
 end
 
 function SplineBasis(knots::AbstractVector{T}, order::Int=4) where {T<:Real}
     return SplineBasis(order,
                        length(knots),
                        length(knots) - order,
-                       zeroIndexedArray(knots))
+                       Vector{T}(knots))
 end
 
 function basis(bs::SplineBasis{T}, x::T, derivs::Int=0) where {T<:Real}
@@ -20,49 +18,48 @@ function basis(bs::SplineBasis{T}, x::T, derivs::Int=0) where {T<:Real}
     m = derivs
     hh = bs.order
     ell = _find_interval(bs, x)
-    result = zeroIndexedArray(zeros(T, 2 * k + 2))
+    result = zeros(T, 2 * k + 2)
     one = T(1)
     zero = T(0)
-    result[0] = one
+    result[1] = one
     for j in 1:(k - m)
         for n in 0:(j - 1)
-            result[hh + n] = result[n]
+            result[hh + n + 1] = result[n + 1]
         end
-        result[0] = zero
+        result[1] = zero
         for n in 1:j
             ind = ell + n
             xb = t[ind]
             xa = t[ind - j]
             if (xb == xa)
-                result[n] = zero
+                result[n + 1] = zero
                 continue
             end
-            w = result[hh + n - 1] / (xb - xa)
-            result[n - 1] = result[n - 1] + w * (xb - x)
-            result[n] = w * (x - xa)
+            w = result[hh + n] / (xb - xa)
+            result[n] = result[n] + w * (xb - x)
+            result[n + 1] = w * (x - xa)
         end
     end
     for j in (k - m + 1):k
         for n in 0:(j - 1)
-            result[hh + n] = result[n]
+            result[hh + n + 1] = result[n + 1]
         end
-        result[0] = zero
+        result[1] = zero
         for n in 1:j
             ind = ell + n
             xb = t[ind]
             xa = t[ind - j]
             if xb == xa
-                result[m] = zero
+                result[m + 1] = zero
                 continue
             end
-            w = j * result[hh + n - 1] / (xb - xa)
-            result[n - 1] = result[n - 1] - w
-            result[n] = w
+            w = j * result[hh + n] / (xb - xa)
+            result[n] = result[n] - w
+            result[n + 1] = w
         end
     end
-    offset = ell - k
     v = zeros(T, bs.ncoef)
-    v[(1 + offset):(k + 1 + offset)] = result[0:k]
+    copyto!(view(v, (ell - k):(ell)), view(result, 1:(k + 1)))
     return v
 end
 
