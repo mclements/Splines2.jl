@@ -38,7 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Julia Setup
-        uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9 # v2.7.0
+        uses: julia-actions/setup-julia@f6f565d9f7cf12f53dc8045742460d6260ad3b39 # v3.0.1
         with:
           version: ${{ matrix.version }}
       - name: Cache
