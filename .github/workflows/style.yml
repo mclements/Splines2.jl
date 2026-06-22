@@ -32,7 +32,7 @@ jobs:
           using JuliaFormatter
           format("."; verbose=true) || exit(1)
       # Add formatting suggestions to non-draft PRs when "Check formatting" fails
-      - uses: reviewdog/action-suggester@v1
+      - uses: reviewdog/action-suggester@v1.24.0
         if: ${{ !success() && !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
         with:
           tool_name: JuliaFormatter
