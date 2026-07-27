@@ -44,7 +44,7 @@ jobs:
       - name: Cache
         uses: julia-actions/cache@9a93c5fb3e9c1c20b60fc80a478cae53e38618a4 # v3.0.2
       - name: Test
-        uses: julia-actions/julia-runtest@d60b785c6f2bdf4ebfb18b2b6f7d93b7dfb0efe3 # v1.11.4
+        uses: julia-actions/julia-runtest@fc07e51ec99db23b29943e95406b5762501e2897 # v1.11.5
       - name: Coverage Process
         uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # latest
       - name: Coverage Upload
